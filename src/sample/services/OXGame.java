@@ -332,6 +332,13 @@ public class OXGame implements IOXGame {
 
     public void onColumnValueChanged(TableColumn.CellEditEvent<Game, String> editEvent){
         Game editedGame = score_table.getSelectionModel().getSelectedItem();
+
+        if(!Utils.isNickNameValid(editEvent.getNewValue())){
+            info_label.setText("Nowa nazwa użytkownika jest nieprawidłowa");
+            score_table.refresh();
+            return;
+        }
+
         if(editEvent.getTableColumn().getId().equals("playerX")){
             editedGame.setGraczX(editEvent.getNewValue());
         }
