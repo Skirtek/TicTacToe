@@ -5,6 +5,8 @@ import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class Main extends Application {
 
@@ -17,8 +19,16 @@ public class Main extends Application {
         primaryStage.show();
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(Main.class);
 
     public static void main(String[] args) {
-        launch(args);
+        try{
+            logger.info("Uruchomiono grę");
+            logger.info("Wersja gry: {}", "1.0");
+            launch(args);
+        }
+        catch(Exception ex){
+            logger.error("Błąd uruchamiania aplikacji {}", ex.getMessage());
+        }
     }
 }

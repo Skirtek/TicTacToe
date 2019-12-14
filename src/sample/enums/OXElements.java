@@ -2,7 +2,8 @@ package sample.enums;
 
 public enum OXElements {
     O("O"),
-    X("X");
+    X("X"),
+    Tie("");
 
     String elementVisualisation;
     OXElements(String element) {

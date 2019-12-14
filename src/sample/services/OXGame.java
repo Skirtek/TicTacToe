@@ -1,26 +1,34 @@
 package sample.services;
 
-import com.sun.deploy.util.StringUtils;
 import javafx.animation.RotateTransition;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
-import javafx.scene.control.Button;
-import javafx.scene.control.Label;
-import javafx.scene.control.TextField;
+import javafx.scene.control.*;
+import javafx.scene.control.cell.PropertyValueFactory;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import sample.enums.GameFields;
 import sample.enums.OXElements;
 import sample.interfaces.IOXGame;
+import sample.models.Game;
+import sample.utilities.Utils;
 
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class OXGame implements IOXGame {
 
     private static final String String_Empty = "";
+
     private OXElements Turn;
     private ArrayList<Integer> X_Positions = new ArrayList<>();
     private ArrayList<Integer> O_Positions = new ArrayList<>();
@@ -33,6 +41,8 @@ public class OXGame implements IOXGame {
     private String player_two;
 
     //region Buttons
+    public Button reset_history;
+
     public Button start_button;
 
     public Button top_left_button;
@@ -58,6 +68,20 @@ public class OXGame implements IOXGame {
     public Label info_label;
     //endregion
 
+    //region Table properties
+    public TableView<Game> score_table;
+    public TableColumn<Game, Integer> idColumn;
+    public TableColumn<Game, OXElements> winner;
+    public TableColumn<Game, String> playerO;
+    public TableColumn<Game, String> playerX;
+    public TableColumn<Game, String> dateTimeColumn;
+    //endregion
+
+    private RepositoryService repositoryInstance;
+    private ObservableList<Game> rozgrywki;
+
+    private static final Logger logger = LoggerFactory.getLogger(OXGame.class);
+
     //region Buttons actions
     @FXML
     public void OnStartClick() {
@@ -66,9 +90,9 @@ public class OXGame implements IOXGame {
         player_one = player_one_field.getText();
         player_two = player_two_field.getText();
 
-        if (isNullOrWhitespace(player_one) || isNullOrWhitespace(player_two)) {
+        if (!Utils.isNickNameValid(player_one) || !Utils.isNickNameValid(player_two)) {
             info_label.setTextFill(Color.RED);
-            info_label.setText("Proszę wybrać nazwę gracza");
+            info_label.setText("Nazwa gracza jest niepoprawna");
             return;
         }
 
@@ -87,6 +111,19 @@ public class OXGame implements IOXGame {
         Button clickedButton = (Button) event.getSource();
         setField(clickedButton);
     }
+
+    @FXML
+    public void onResetClick() {
+        int result = repositoryInstance.usunRozgrywki();
+
+        if(result < 0){
+            logger.error("Nie udało się wyczyścić rozgrywek!");
+            return;
+        }
+
+        info_label.setText("Rozgrywki zostały usunięte");
+        rozgrywki.clear();
+    }
     //endregion
 
     //region IOXGame Implementation
@@ -97,11 +134,32 @@ public class OXGame implements IOXGame {
         ResetButtons();
         ChangeButtonsResponsiveness(true);
         ResetPositions();
+
+        if (repositoryInstance == null) {
+            repositoryInstance = new RepositoryService();
+        }
+
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("rozgrywkaId"));
+        winner.setCellValueFactory(new PropertyValueFactory<>("zwyciezca"));
+        playerO.setCellValueFactory(new PropertyValueFactory<>("graczO"));
+        playerX.setCellValueFactory(new PropertyValueFactory<>("graczX"));
+        dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDateTime"));
+        rozgrywki = FXCollections.observableArrayList();
+        score_table.setItems(rozgrywki);
+
+        ExecutorService threadWorker = Executors.newFixedThreadPool(1);
+        threadWorker.execute(() -> {
+            List<Game> rows = repositoryInstance.pobierzRozgrywki(1, repositoryInstance.getLastId());
+
+            if (rows != null && rows.size() != 0) {
+                rozgrywki.addAll(rows);
+            }
+        });
     }
 
     @Override
     public void setField(Button button) {
-        if (isNullOrWhitespace(button.getText())) {
+        if (Utils.isNullOrWhitespace(button.getText())) {
 
             button.setText(Turn.getVisualisation());
             AddMove(Turn, GameFields.valueOf(button.getId()).getPosition());
@@ -111,6 +169,15 @@ public class OXGame implements IOXGame {
                 turn_label.setVisible(false);
                 info_label.setText(String.format("Wygrał gracz: %s", getWinner() == OXElements.O ? player_two : player_one));
                 AnimateTiles();
+                Game gameToSave = new Game(getWinner().getVisualisation(), player_one, player_two, LocalDateTime.now());
+                int result = repositoryInstance.zapiszRozgrywke(gameToSave);
+
+                if(result < 1){
+                    logger.error(String.format("Rozgrywka między %s a %s o godzinie %s nie została zapisana!", gameToSave.getGraczO(), gameToSave.getGraczX(), gameToSave.getFormattedDateTime()));
+                }
+
+                gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
+                rozgrywki.add(gameToSave);
                 return;
             }
 
@@ -118,6 +185,15 @@ public class OXGame implements IOXGame {
                 info_label.setText("Remis");
                 turn_label.setVisible(false);
                 ChangeButtonsResponsiveness(true);
+                Game gameToSave = new Game(OXElements.Tie.getVisualisation(), player_one, player_two, LocalDateTime.now());
+                int result = repositoryInstance.zapiszRozgrywke(gameToSave);
+
+                if(result < 1){
+                    logger.error(String.format("Rozgrywka między %s a %s o godzinie %s nie została zapisana!", gameToSave.getGraczO(), gameToSave.getGraczX(), gameToSave.getFormattedDateTime()));
+                }
+
+                gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
+                rozgrywki.add(gameToSave);
                 return;
             }
 
@@ -215,10 +291,6 @@ public class OXGame implements IOXGame {
         }
 
         return false;
-    }
-
-    private boolean isNullOrWhitespace(String s) {
-        return s == null || StringUtils.trimWhitespace(s).length() == 0;
     }
 
     private void ResetPositions() {
