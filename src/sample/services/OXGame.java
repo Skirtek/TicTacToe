@@ -7,6 +7,7 @@ import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.scene.control.*;
 import javafx.scene.control.cell.PropertyValueFactory;
+import javafx.scene.control.cell.TextFieldTableCell;
 import javafx.scene.paint.Color;
 import javafx.util.Duration;
 import org.slf4j.Logger;
@@ -146,6 +147,9 @@ public class OXGame implements IOXGame {
         dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDateTime"));
         rozgrywki = FXCollections.observableArrayList();
         score_table.setItems(rozgrywki);
+        score_table.setEditable(true);
+        playerX.setCellFactory(TextFieldTableCell.forTableColumn());
+        playerO.setCellFactory(TextFieldTableCell.forTableColumn());
 
         ExecutorService threadWorker = Executors.newFixedThreadPool(1);
         threadWorker.execute(() -> {
@@ -323,6 +327,22 @@ public class OXGame implements IOXGame {
         for (int position : getWinnerIndexes()) {
             Button buttonToAnimate = buttons.get(position);
             GetTransition(buttonToAnimate).play();
+        }
+    }
+
+    public void onColumnValueChanged(TableColumn.CellEditEvent<Game, String> editEvent){
+        Game editedGame = score_table.getSelectionModel().getSelectedItem();
+        if(editEvent.getTableColumn().getId().equals("playerX")){
+            editedGame.setGraczX(editEvent.getNewValue());
+        }
+        else {
+            editedGame.setGraczO(editEvent.getNewValue());
+        }
+
+        int result = repositoryInstance.updateGame(editedGame);
+
+        if(result < 1){
+            logger.error(String.format("Rozgrywka o ID %d nie została zaktualizowana!", editedGame.getRozgrywkaId()));
         }
     }
     //endregion

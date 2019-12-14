@@ -137,8 +137,8 @@
         <columns>
           <TableColumn fx:id="idColumn" prefWidth="-1.0" text="Id" />
           <TableColumn fx:id="winner" prefWidth="-1.0" text="Zwycięzca" />
-            <TableColumn fx:id="playerO" prefWidth="-1.0" text="Gracz O" />
-            <TableColumn fx:id="playerX" prefWidth="-1.0" text="Gracz X" />
+            <TableColumn fx:id="playerO" prefWidth="-1.0" text="Gracz O" onEditCommit="#onColumnValueChanged" />
+            <TableColumn fx:id="playerX" prefWidth="-1.0" text="Gracz X" onEditCommit="#onColumnValueChanged" />
             <TableColumn fx:id="dateTimeColumn" prefWidth="-1.0" text="Data i czas rozgrywki" />
         </columns>
          <columnResizePolicy>

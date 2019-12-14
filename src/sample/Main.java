@@ -13,7 +13,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception{
         Parent root = FXMLLoader.load(getClass().getResource("sample.fxml"));
-        primaryStage.setTitle("Tik Tak Toe");
+        primaryStage.setTitle("Tic Tac Toe");
         primaryStage.setScene(new Scene(root, 300, 275));
         primaryStage.setMaximized(true);
         primaryStage.show();
