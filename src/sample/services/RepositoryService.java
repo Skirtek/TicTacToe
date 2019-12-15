@@ -61,7 +61,7 @@ public class RepositoryService implements IRepositoryService {
     @Override
     public int usunRozgrywki() {
         try (Connection conn = Repository.getConnection()) {
-            return conn.createStatement().executeUpdate("TRUNCATE TABLE rozgrywka;");
+            return conn.createStatement().executeUpdate("TRUNCATE TABLE rozgrywka RESTART IDENTITY AND COMMIT NO CHECK;");
         } catch (SQLException e) {
             e.printStackTrace();
             return -1;
