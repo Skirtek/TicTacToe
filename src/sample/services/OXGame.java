@@ -16,6 +16,7 @@ import sample.enums.GameFields;
 import sample.enums.OXElements;
 import sample.interfaces.IOXGame;
 import sample.models.Game;
+import sample.models.Statistics;
 import sample.utilities.Utils;
 
 import java.time.LocalDateTime;
@@ -69,17 +70,24 @@ public class OXGame implements IOXGame {
     public Label info_label;
     //endregion
 
-    //region Table properties
+    //region Tables properties
     public TableView<Game> score_table;
     public TableColumn<Game, Integer> idColumn;
     public TableColumn<Game, OXElements> winner;
     public TableColumn<Game, String> playerO;
     public TableColumn<Game, String> playerX;
     public TableColumn<Game, String> dateTimeColumn;
+
+    public TableView<Statistics> statistics_table;
+    public TableColumn<Statistics, String> firstName;
+    public TableColumn<Statistics, Long> totalGames;
+    public TableColumn<Statistics, Long> wins;
+    public TableColumn<Statistics, String> effectiveness;
     //endregion
 
     private RepositoryService repositoryInstance;
-    private ObservableList<Game> rozgrywki;
+    private ObservableList<Game> games;
+    private ObservableList<Statistics> statistics;
 
     private static final Logger logger = LoggerFactory.getLogger(OXGame.class);
 
@@ -123,7 +131,36 @@ public class OXGame implements IOXGame {
         }
 
         info_label.setText("Rozgrywki zostały usunięte");
-        rozgrywki.clear();
+        games.clear();
+        statistics.clear();
+    }
+
+    @FXML
+    public void onColumnValueChanged(TableColumn.CellEditEvent<Game, String> editEvent){
+        Game editedGame = score_table.getSelectionModel().getSelectedItem();
+
+        if(!Utils.isNickNameValid(editEvent.getNewValue())){
+            info_label.setText("Nowa nazwa użytkownika jest nieprawidłowa");
+            score_table.refresh();
+            return;
+        }
+
+        if(editEvent.getTableColumn().getId().equals("playerX")){
+            editedGame.setGraczX(editEvent.getNewValue());
+        }
+        else {
+            editedGame.setGraczO(editEvent.getNewValue());
+        }
+
+        int result = repositoryInstance.updateGame(editedGame);
+
+        if(result < 1){
+            logger.error(String.format("Rozgrywka o ID %d nie została zaktualizowana!", editedGame.getRozgrywkaId()));
+            return;
+        }
+
+        statistics.clear();
+        statistics.addAll(repositoryInstance.getStatistics(games));
     }
     //endregion
 
@@ -145,8 +182,17 @@ public class OXGame implements IOXGame {
         playerO.setCellValueFactory(new PropertyValueFactory<>("graczO"));
         playerX.setCellValueFactory(new PropertyValueFactory<>("graczX"));
         dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDateTime"));
-        rozgrywki = FXCollections.observableArrayList();
-        score_table.setItems(rozgrywki);
+        games = FXCollections.observableArrayList();
+        score_table.setItems(games);
+
+        firstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        wins.setCellValueFactory(new PropertyValueFactory<>("wins"));
+        totalGames.setCellValueFactory(new PropertyValueFactory<>("totalGames"));
+        effectiveness.setCellValueFactory(new PropertyValueFactory<>("effectiveness"));
+
+        statistics = FXCollections.observableArrayList();
+        statistics_table.setItems(statistics);
+
         score_table.setEditable(true);
         playerX.setCellFactory(TextFieldTableCell.forTableColumn());
         playerO.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -156,7 +202,8 @@ public class OXGame implements IOXGame {
             List<Game> rows = repositoryInstance.pobierzRozgrywki(1, repositoryInstance.getLastId());
 
             if (rows != null && rows.size() != 0) {
-                rozgrywki.addAll(rows);
+                games.addAll(rows);
+                statistics.addAll(repositoryInstance.getStatistics(rows));
             }
         });
     }
@@ -181,7 +228,10 @@ public class OXGame implements IOXGame {
                 }
 
                 gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
-                rozgrywki.add(gameToSave);
+                games.add(gameToSave);
+
+                statistics.clear();
+                statistics.addAll(repositoryInstance.getStatistics(games));
                 return;
             }
 
@@ -197,7 +247,10 @@ public class OXGame implements IOXGame {
                 }
 
                 gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
-                rozgrywki.add(gameToSave);
+                games.add(gameToSave);
+
+                statistics.clear();
+                statistics.addAll(repositoryInstance.getStatistics(games));
                 return;
             }
 
@@ -327,29 +380,6 @@ public class OXGame implements IOXGame {
         for (int position : getWinnerIndexes()) {
             Button buttonToAnimate = buttons.get(position);
             GetTransition(buttonToAnimate).play();
-        }
-    }
-
-    public void onColumnValueChanged(TableColumn.CellEditEvent<Game, String> editEvent){
-        Game editedGame = score_table.getSelectionModel().getSelectedItem();
-
-        if(!Utils.isNickNameValid(editEvent.getNewValue())){
-            info_label.setText("Nowa nazwa użytkownika jest nieprawidłowa");
-            score_table.refresh();
-            return;
-        }
-
-        if(editEvent.getTableColumn().getId().equals("playerX")){
-            editedGame.setGraczX(editEvent.getNewValue());
-        }
-        else {
-            editedGame.setGraczO(editEvent.getNewValue());
-        }
-
-        int result = repositoryInstance.updateGame(editedGame);
-
-        if(result < 1){
-            logger.error(String.format("Rozgrywka o ID %d nie została zaktualizowana!", editedGame.getRozgrywkaId()));
         }
     }
     //endregion

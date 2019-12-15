@@ -96,7 +96,7 @@
                   </Label>
                   <TextField fx:id="player_one_field" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="2" />
                   <TextField fx:id="player_two_field" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" GridPane.columnIndex="4" />
-                   <Button fx:id="reset_history"  maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onResetClick" text="WYCZYŚĆ HISTORIĘ">
+                   <Button fx:id="reset_history" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#onResetClick" text="WYCZYŚĆ HISTORIĘ">
                        <GridPane.margin>
                            <Insets left="16.0" />
                        </GridPane.margin></Button>
@@ -133,17 +133,32 @@
       </VBox>
    </top>
    <bottom>
-      <TableView fx:id="score_table" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-        <columns>
-          <TableColumn fx:id="idColumn" prefWidth="-1.0" text="Id" />
-          <TableColumn fx:id="winner" prefWidth="-1.0" text="Zwycięzca" />
-            <TableColumn fx:id="playerO" prefWidth="-1.0" text="Gracz O" onEditCommit="#onColumnValueChanged" />
-            <TableColumn fx:id="playerX" prefWidth="-1.0" text="Gracz X" onEditCommit="#onColumnValueChanged" />
-            <TableColumn fx:id="dateTimeColumn" prefWidth="-1.0" text="Data i czas rozgrywki" />
-        </columns>
-         <columnResizePolicy>
-            <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
-         </columnResizePolicy>
-      </TableView>
+      <HBox maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <TableView fx:id="score_table" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+              <columns>
+                <TableColumn fx:id="idColumn" prefWidth="-1.0" text="Id" />
+                <TableColumn fx:id="winner" prefWidth="-1.0" text="Zwycięzca" />
+                  <TableColumn fx:id="playerO" onEditCommit="#onColumnValueChanged" prefWidth="-1.0" text="Gracz O" />
+                  <TableColumn fx:id="playerX" onEditCommit="#onColumnValueChanged" prefWidth="-1.0" text="Gracz X" />
+                  <TableColumn fx:id="dateTimeColumn" prefWidth="-1.0" text="Data i czas rozgrywki" />
+              </columns>
+               <columnResizePolicy>
+                  <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+               </columnResizePolicy>
+            </TableView>
+            <TableView fx:id="statistics_table" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" prefHeight="200.0" prefWidth="200.0" HBox.hgrow="ALWAYS">
+              <columns>
+                  <TableColumn fx:id="firstName" prefWidth="-1.0" text="Imię" />
+                  <TableColumn fx:id="totalGames" prefWidth="-1.0" text="Zagrane gry" />
+                  <TableColumn fx:id="wins" prefWidth="-1.0" text="Wygrane gry" />
+                  <TableColumn fx:id="effectiveness" prefWidth="-1.0" text="Skuteczność [%]" />
+              </columns>
+                <columnResizePolicy>
+                    <TableView fx:constant="CONSTRAINED_RESIZE_POLICY" />
+                </columnResizePolicy>
+            </TableView>
+         </children>
+      </HBox>
    </bottom>
 </BorderPane>
