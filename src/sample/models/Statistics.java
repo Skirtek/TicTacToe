@@ -4,13 +4,15 @@ public class Statistics implements Comparable<Statistics>  {
     private String firstName;
     private Long wins;
     private Long totalGames;
-    private String effectiveness;
+    private Double effectiveness;
+    private String effectivenessPercentage;
 
     public Statistics(String firstName, Long wins, Long totalGames) {
         this.firstName = firstName;
         this.wins = wins;
         this.totalGames = totalGames;
-        this.effectiveness = ((double)wins / totalGames) * 100 + "%";
+        this.effectiveness = ((double)wins / totalGames) * 100;
+        this.effectivenessPercentage = this.effectiveness + "%";
     }
 
     public String getFirstName() {
@@ -37,8 +39,12 @@ public class Statistics implements Comparable<Statistics>  {
         this.totalGames = totalGames;
     }
 
-    public String getEffectiveness() {
+    public Double getEffectiveness() {
         return effectiveness;
+    }
+
+    public String getEffectivenessPercentage() {
+        return effectivenessPercentage;
     }
 
     @Override
@@ -47,7 +53,7 @@ public class Statistics implements Comparable<Statistics>  {
     }
 
     @Override
-    public int compareTo(Statistics compare) {
-        return compare.getWins().compareTo(getWins());
+    public int compareTo(Statistics comparableObject) {
+        return comparableObject.getEffectiveness().compareTo(getEffectiveness());
     }
 }

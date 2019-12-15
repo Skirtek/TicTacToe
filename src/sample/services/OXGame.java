@@ -188,7 +188,7 @@ public class OXGame implements IOXGame {
         firstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         wins.setCellValueFactory(new PropertyValueFactory<>("wins"));
         totalGames.setCellValueFactory(new PropertyValueFactory<>("totalGames"));
-        effectiveness.setCellValueFactory(new PropertyValueFactory<>("effectiveness"));
+        effectiveness.setCellValueFactory(new PropertyValueFactory<>("effectivenessPercentage"));
 
         statistics = FXCollections.observableArrayList();
         statistics_table.setItems(statistics);
