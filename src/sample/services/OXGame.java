@@ -1,7 +1,9 @@
 package sample.services;
 
 import javafx.animation.RotateTransition;
+import javafx.application.Platform;
 import javafx.collections.FXCollections;
+import javafx.collections.ListChangeListener;
 import javafx.collections.ObservableList;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
@@ -30,6 +32,8 @@ import java.util.concurrent.Executors;
 public class OXGame implements IOXGame {
 
     private static final String String_Empty = "";
+    public Pagination pagination;
+    private int currentIndex = 0;
 
     private OXElements Turn;
     private ArrayList<Integer> X_Positions = new ArrayList<>();
@@ -159,6 +163,13 @@ public class OXGame implements IOXGame {
             return;
         }
 
+        games.stream()
+                .filter(game -> editedGame.getRozgrywkaId().equals(game.getRozgrywkaId()))
+                .findAny().ifPresent(originalGame -> {
+                    originalGame.setGraczO(editedGame.getGraczO());
+                    originalGame.setGraczX(editedGame.getGraczX());
+                });
+
         statistics.clear();
         statistics.addAll(repositoryInstance.getStatistics(games));
     }
@@ -177,35 +188,16 @@ public class OXGame implements IOXGame {
             repositoryInstance = new RepositoryService();
         }
 
-        idColumn.setCellValueFactory(new PropertyValueFactory<>("rozgrywkaId"));
-        winner.setCellValueFactory(new PropertyValueFactory<>("zwyciezca"));
-        playerO.setCellValueFactory(new PropertyValueFactory<>("graczO"));
-        playerX.setCellValueFactory(new PropertyValueFactory<>("graczX"));
-        dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDateTime"));
         games = FXCollections.observableArrayList();
-        score_table.setItems(games);
-
-        firstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
-        wins.setCellValueFactory(new PropertyValueFactory<>("wins"));
-        totalGames.setCellValueFactory(new PropertyValueFactory<>("totalGames"));
-        effectiveness.setCellValueFactory(new PropertyValueFactory<>("effectivenessPercentage"));
-
         statistics = FXCollections.observableArrayList();
-        statistics_table.setItems(statistics);
+
+        LoadGames();
+        InitializeScoreTable();
+        InitializeStatisticsTable();
 
         score_table.setEditable(true);
         playerX.setCellFactory(TextFieldTableCell.forTableColumn());
         playerO.setCellFactory(TextFieldTableCell.forTableColumn());
-
-        ExecutorService threadWorker = Executors.newFixedThreadPool(1);
-        threadWorker.execute(() -> {
-            List<Game> rows = repositoryInstance.pobierzRozgrywki(1, repositoryInstance.getLastId());
-
-            if (rows != null && rows.size() != 0) {
-                games.addAll(rows);
-                statistics.addAll(repositoryInstance.getStatistics(rows));
-            }
-        });
     }
 
     @Override
@@ -287,10 +279,82 @@ public class OXGame implements IOXGame {
     //endregion
 
     //region Private methods
+    private void InitializeScoreTable(){
+        idColumn.setCellValueFactory(new PropertyValueFactory<>("rozgrywkaId"));
+        winner.setCellValueFactory(new PropertyValueFactory<>("zwyciezca"));
+        playerO.setCellValueFactory(new PropertyValueFactory<>("graczO"));
+        playerX.setCellValueFactory(new PropertyValueFactory<>("graczX"));
+        dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDateTime"));
+
+        pagination.currentPageIndexProperty()
+                .addListener((obs, oldIndex, newIndex) -> changeTableView(newIndex.intValue(), 3));
+
+        games.addListener((ListChangeListener<Game>) c -> {
+            UpdatePageCount();
+
+            if(c.next()){
+                if(c.wasAdded()){
+                    changeTableView(c.getAddedSize() == 1 ? currentIndex : 0,3);
+                }
+
+                else if(c.wasRemoved()){
+                    score_table.getItems().clear();
+                    score_table.refresh();
+                    changeTableView(0,3);
+                }
+            }
+        });
+    }
+
+    private void InitializeStatisticsTable(){
+        firstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
+        wins.setCellValueFactory(new PropertyValueFactory<>("wins"));
+        totalGames.setCellValueFactory(new PropertyValueFactory<>("totalGames"));
+        effectiveness.setCellValueFactory(new PropertyValueFactory<>("effectivenessPercentage"));
+        statistics_table.setItems(statistics);
+    }
+
+    private void changeTableView(int index, int limit) {
+        currentIndex = index;
+
+        if(games.size() == 0){
+            pagination.setCurrentPageIndex(currentIndex);
+            return;
+        }
+
+        int fromIndex = index * limit;
+        int toIndex = Math.min(fromIndex + limit, games.size());
+
+        ObservableList<Game> tmpObsToSetTableVal = FXCollections.observableArrayList();
+
+        tmpObsToSetTableVal.addAll(games.subList(fromIndex, toIndex));
+
+        score_table.setItems(tmpObsToSetTableVal);
+    }
+
+    private void LoadGames(){
+        ExecutorService threadWorker = Executors.newFixedThreadPool(1);
+        threadWorker.execute(() -> {
+            List<Game> rows = repositoryInstance.pobierzRozgrywki(1, repositoryInstance.getLastId());
+
+            if (rows != null && rows.size() != 0) {
+                Platform.runLater(() -> {
+                    games.addAll(rows);
+                    statistics.addAll(repositoryInstance.getStatistics(rows));
+                });
+            }
+        });
+    }
+
     private void ResetButtons() {
         for (Button button : buttons) {
             button.setText(String_Empty);
         }
+    }
+
+    private void UpdatePageCount(){
+        int totalPage = (int) (Math.ceil(games.size() * 1.0 / 3));
+        pagination.setPageCount(totalPage);
     }
 
     private void ChangeButtonsResponsiveness(boolean disableState) {
