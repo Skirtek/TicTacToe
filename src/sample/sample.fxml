@@ -21,42 +21,42 @@
           <RowConstraints minHeight="10.0" prefHeight="30.0" vgrow="SOMETIMES" />
         </rowConstraints>
          <children>
-            <Button fx:id="top_left_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="147.0" prefWidth="266.0" text="X" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+            <Button fx:id="top_left_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="147.0" prefWidth="266.0" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <font>
                   <Font name="Roboto Black" size="36.0" />
                </font></Button>
-            <Button fx:id="top_center_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="168.0" prefWidth="310.0" text="X" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+            <Button fx:id="top_center_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="168.0" prefWidth="310.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <font>
                   <Font name="Roboto Black" size="36.0" />
                </font></Button>
-            <Button fx:id="bottom_left_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="181.0" prefWidth="345.0" text="X" GridPane.rowIndex="2">
+            <Button fx:id="bottom_left_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="181.0" prefWidth="345.0" GridPane.rowIndex="2">
                 <font>
                     <Font name="Roboto Black" size="36.0" />
                 </font>
             </Button>
-            <Button fx:id="middle_left_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="146.0" prefWidth="393.0" text="X" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+            <Button fx:id="middle_left_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="146.0" prefWidth="393.0" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                <font>
                   <Font name="Roboto Black" size="36.0" />
                </font></Button>
-            <Button fx:id="middle_center_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="156.0" prefWidth="368.0" text="X" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
+            <Button fx:id="middle_center_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="156.0" prefWidth="368.0" GridPane.columnIndex="1" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1" GridPane.vgrow="ALWAYS">
                 <font>
                     <Font name="Roboto Black" size="36.0" />
                 </font></Button>
-            <Button fx:id="top_right_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="207.0" prefWidth="341.0" text="X" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
+            <Button fx:id="top_right_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="207.0" prefWidth="341.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.vgrow="ALWAYS">
                <font>
                   <Font name="Roboto Black" size="36.0" />
                </font></Button>
-            <Button fx:id="middle_right_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="171.0" prefWidth="287.0" text="X" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
+            <Button fx:id="middle_right_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="171.0" prefWidth="287.0" GridPane.columnIndex="2" GridPane.hgrow="ALWAYS" GridPane.rowIndex="1">
                 <font>
                     <Font name="Roboto Black" size="36.0" />
                 </font>
             </Button>
-            <Button fx:id="bottom_center_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="176.0" prefWidth="333.0" text="X" GridPane.columnIndex="1" GridPane.rowIndex="2">
+            <Button fx:id="bottom_center_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="176.0" prefWidth="333.0" GridPane.columnIndex="1" GridPane.rowIndex="2">
                 <font>
                     <Font name="Roboto Black" size="36.0" />
                 </font>
             </Button>
-            <Button fx:id="bottom_right_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="168.0" prefWidth="288.0" text="X" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
+            <Button fx:id="bottom_right_button" maxHeight="1.7976931348623157E308" maxWidth="1.7976931348623157E308" mnemonicParsing="false" onAction="#OnFieldClick" prefHeight="168.0" prefWidth="288.0" GridPane.columnIndex="2" GridPane.rowIndex="2" GridPane.vgrow="ALWAYS">
                 <font>
                     <Font name="Roboto Black" size="36.0" />
                 </font>

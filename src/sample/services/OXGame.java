@@ -31,6 +31,7 @@ import java.util.concurrent.Executors;
 
 public class OXGame implements IOXGame {
 
+    //TODO WNIOSEK - BRAK STRING EMPTY
     private static final String String_Empty = "";
     public Pagination pagination;
     private int currentIndex = 0;
@@ -163,6 +164,7 @@ public class OXGame implements IOXGame {
             return;
         }
 
+        //TODO - WNIOSEK, BRAK LINQ
         games.stream()
                 .filter(game -> editedGame.getRozgrywkaId().equals(game.getRozgrywkaId()))
                 .findAny().ifPresent(originalGame -> {
@@ -202,8 +204,8 @@ public class OXGame implements IOXGame {
 
     @Override
     public void setField(Button button) {
+        //TODO Wniosek - brak metody
         if (Utils.isNullOrWhitespace(button.getText())) {
-
             button.setText(Turn.getVisualisation());
             AddMove(Turn, GameFields.valueOf(button.getId()).getPosition());
 
@@ -258,12 +260,7 @@ public class OXGame implements IOXGame {
 
     @Override
     public void setTurn() {
-        if (Turn == OXElements.O) {
-            Turn = OXElements.X;
-        } else {
-            Turn = OXElements.O;
-        }
-
+        Turn = Turn == OXElements.O ? OXElements.X : OXElements.O;
         turn_label.setText(String.format("Ruch gracza %s", Turn.getVisualisation()));
     }
 
