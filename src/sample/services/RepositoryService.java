@@ -35,7 +35,7 @@ public class RepositoryService implements IRepositoryService {
         try (Connection conn = Repository.getConnection()) {
             List<Game> lista = new ArrayList<>();
 
-            final String SQL_SELECT = "SELECT * FROM rozgrywka WHERE rozgrywka_id BETWEEN ? AND ?";
+            final String SQL_SELECT = "SELECT * FROM rozgrywka WHERE rozgrywka_id >= ? LIMIT ?";
             PreparedStatement statement = conn.prepareStatement(SQL_SELECT);
 
             statement.setInt(1, firstId);

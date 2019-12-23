@@ -96,6 +96,8 @@ public class OXGame implements IOXGame {
 
     private static final Logger logger = LoggerFactory.getLogger(OXGame.class);
 
+    private ExecutorService threadWorker = Executors.newFixedThreadPool(3);
+
     //region Buttons actions
     @FXML
     public void OnStartClick() {
@@ -130,7 +132,7 @@ public class OXGame implements IOXGame {
     public void onResetClick() {
         int result = repositoryInstance.usunRozgrywki();
 
-        if(result < 0){
+        if (result < 0) {
             logger.error("Nie udało się wyczyścić rozgrywek!");
             return;
         }
@@ -141,25 +143,24 @@ public class OXGame implements IOXGame {
     }
 
     @FXML
-    public void onColumnValueChanged(TableColumn.CellEditEvent<Game, String> editEvent){
+    public void onColumnValueChanged(TableColumn.CellEditEvent<Game, String> editEvent) {
         Game editedGame = score_table.getSelectionModel().getSelectedItem();
 
-        if(!Utils.isNickNameValid(editEvent.getNewValue())){
+        if (!Utils.isNickNameValid(editEvent.getNewValue())) {
             info_label.setText("Nowa nazwa użytkownika jest nieprawidłowa");
             score_table.refresh();
             return;
         }
 
-        if(editEvent.getTableColumn().getId().equals("playerX")){
+        if (editEvent.getTableColumn().getId().equals("playerX")) {
             editedGame.setGraczX(editEvent.getNewValue());
-        }
-        else {
+        } else {
             editedGame.setGraczO(editEvent.getNewValue());
         }
 
         int result = repositoryInstance.updateGame(editedGame);
 
-        if(result < 1){
+        if (result < 1) {
             logger.error(String.format("Rozgrywka o ID %d nie została zaktualizowana!", editedGame.getRozgrywkaId()));
             return;
         }
@@ -168,9 +169,9 @@ public class OXGame implements IOXGame {
         games.stream()
                 .filter(game -> editedGame.getRozgrywkaId().equals(game.getRozgrywkaId()))
                 .findAny().ifPresent(originalGame -> {
-                    originalGame.setGraczO(editedGame.getGraczO());
-                    originalGame.setGraczX(editedGame.getGraczX());
-                });
+            originalGame.setGraczO(editedGame.getGraczO());
+            originalGame.setGraczX(editedGame.getGraczX());
+        });
 
         statistics.clear();
         statistics.addAll(repositoryInstance.getStatistics(games));
@@ -215,17 +216,7 @@ public class OXGame implements IOXGame {
                 info_label.setText(String.format("Wygrał gracz: %s", getWinner() == OXElements.O ? player_two : player_one));
                 AnimateTiles();
                 Game gameToSave = new Game(getWinner().getVisualisation(), player_one, player_two, LocalDateTime.now());
-                int result = repositoryInstance.zapiszRozgrywke(gameToSave);
-
-                if(result < 1){
-                    logger.error(String.format("Rozgrywka między %s a %s o godzinie %s nie została zapisana!", gameToSave.getGraczO(), gameToSave.getGraczX(), gameToSave.getFormattedDateTime()));
-                }
-
-                gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
-                games.add(gameToSave);
-
-                statistics.clear();
-                statistics.addAll(repositoryInstance.getStatistics(games));
+                SaveGame(gameToSave);
                 return;
             }
 
@@ -234,17 +225,7 @@ public class OXGame implements IOXGame {
                 turn_label.setVisible(false);
                 ChangeButtonsResponsiveness(true);
                 Game gameToSave = new Game(OXElements.Tie.getVisualisation(), player_one, player_two, LocalDateTime.now());
-                int result = repositoryInstance.zapiszRozgrywke(gameToSave);
-
-                if(result < 1){
-                    logger.error(String.format("Rozgrywka między %s a %s o godzinie %s nie została zapisana!", gameToSave.getGraczO(), gameToSave.getGraczX(), gameToSave.getFormattedDateTime()));
-                }
-
-                gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
-                games.add(gameToSave);
-
-                statistics.clear();
-                statistics.addAll(repositoryInstance.getStatistics(games));
+                SaveGame(gameToSave);
                 return;
             }
 
@@ -276,7 +257,26 @@ public class OXGame implements IOXGame {
     //endregion
 
     //region Private methods
-    private void InitializeScoreTable(){
+    private void SaveGame(Game gameToSave) {
+        threadWorker.execute(() -> {
+            int result = repositoryInstance.zapiszRozgrywke(gameToSave);
+
+            if (result < 0) {
+                logger.error(String.format("Rozgrywka między %s a %s o godzinie %s nie została zapisana!", gameToSave.getGraczO(), gameToSave.getGraczX(), gameToSave.getFormattedDateTime()));
+                return;
+            }
+
+            gameToSave.setRozgrywkaId(repositoryInstance.getLastId());
+            Platform.runLater(() -> {
+                games.add(gameToSave);
+
+                statistics.clear();
+                statistics.addAll(repositoryInstance.getStatistics(games));
+            });
+        });
+    }
+
+    private void InitializeScoreTable() {
         idColumn.setCellValueFactory(new PropertyValueFactory<>("rozgrywkaId"));
         winner.setCellValueFactory(new PropertyValueFactory<>("zwyciezca"));
         playerO.setCellValueFactory(new PropertyValueFactory<>("graczO"));
@@ -289,21 +289,19 @@ public class OXGame implements IOXGame {
         games.addListener((ListChangeListener<Game>) c -> {
             UpdatePageCount();
 
-            if(c.next()){
-                if(c.wasAdded()){
-                    changeTableView(c.getAddedSize() == 1 ? currentIndex : 0,3);
-                }
-
-                else if(c.wasRemoved()){
+            if (c.next()) {
+                if (c.wasAdded()) {
+                    changeTableView(c.getAddedSize() == 1 ? currentIndex : 0, 3);
+                } else if (c.wasRemoved()) {
                     score_table.getItems().clear();
                     score_table.refresh();
-                    changeTableView(0,3);
+                    changeTableView(0, 3);
                 }
             }
         });
     }
 
-    private void InitializeStatisticsTable(){
+    private void InitializeStatisticsTable() {
         firstName.setCellValueFactory(new PropertyValueFactory<>("firstName"));
         wins.setCellValueFactory(new PropertyValueFactory<>("wins"));
         totalGames.setCellValueFactory(new PropertyValueFactory<>("totalGames"));
@@ -314,7 +312,7 @@ public class OXGame implements IOXGame {
     private void changeTableView(int index, int limit) {
         currentIndex = index;
 
-        if(games.size() == 0){
+        if (games.size() == 0) {
             pagination.setCurrentPageIndex(currentIndex);
             return;
         }
@@ -329,12 +327,13 @@ public class OXGame implements IOXGame {
         score_table.setItems(tmpObsToSetTableVal);
     }
 
-    private void LoadGames(){
-        ExecutorService threadWorker = Executors.newFixedThreadPool(1);
+    private void LoadGames() {
+
         threadWorker.execute(() -> {
             List<Game> rows = repositoryInstance.pobierzRozgrywki(1, repositoryInstance.getLastId());
 
             if (rows != null && rows.size() != 0) {
+                //TODO wniosek - synchronizacja wątków
                 Platform.runLater(() -> {
                     games.addAll(rows);
                     statistics.addAll(repositoryInstance.getStatistics(rows));
@@ -349,7 +348,7 @@ public class OXGame implements IOXGame {
         }
     }
 
-    private void UpdatePageCount(){
+    private void UpdatePageCount() {
         int totalPage = (int) (Math.ceil(games.size() * 1.0 / 3));
         pagination.setPageCount(totalPage);
     }

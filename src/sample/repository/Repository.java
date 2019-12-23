@@ -10,6 +10,7 @@ public class Repository {
     private static HikariConfig config = new HikariConfig();
     private static HikariDataSource ds;
 
+    //TODO Wniosek - fajne to
     static {
         config.setDriverClassName("org.hsqldb.jdbc.JDBCDriver");
         config.setJdbcUrl("jdbc:hsqldb:file:lib/db/baza");
@@ -21,7 +22,7 @@ public class Repository {
 
     private Repository() {}
 
-    public static Connection getConnection() throws SQLException{
-            return ds.getConnection();
-    }
+        public static Connection getConnection() throws SQLException{
+                return ds.getConnection();
+        }
 }

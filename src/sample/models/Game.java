@@ -55,9 +55,6 @@ public class Game {
         return formattedDateTime;
     }
 
-    public Game() {
-    }
-
     public Game(Integer rozgrywkaId, String zwyciezca, String graczX, String graczO, LocalDateTime dataczasRozgrywki) {
         this.rozgrywkaId = rozgrywkaId;
         this.zwyciezca = zwyciezca;
