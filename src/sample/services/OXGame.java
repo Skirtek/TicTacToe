@@ -160,7 +160,7 @@ public class OXGame implements IOXGame {
 
         int result = repositoryInstance.updateGame(editedGame);
 
-        if (result < 1) {
+        if (result < 0) {
             logger.error(String.format("Rozgrywka o ID %d nie została zaktualizowana!", editedGame.getRozgrywkaId()));
             return;
         }
