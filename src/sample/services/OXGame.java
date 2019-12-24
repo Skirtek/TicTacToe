@@ -31,10 +31,10 @@ import java.util.concurrent.Executors;
 
 public class OXGame implements IOXGame {
 
-    //TODO WNIOSEK - BRAK STRING EMPTY
     private static final String String_Empty = "";
     public Pagination pagination;
     private int currentIndex = 0;
+    private final int rowsPerPage = 3;
 
     private OXElements Turn;
     private ArrayList<Integer> X_Positions = new ArrayList<>();
@@ -162,10 +162,10 @@ public class OXGame implements IOXGame {
 
         if (result < 0) {
             logger.error(String.format("Rozgrywka o ID %d nie została zaktualizowana!", editedGame.getRozgrywkaId()));
+            score_table.refresh();
             return;
         }
-
-        //TODO - WNIOSEK, BRAK LINQ
+        
         games.stream()
                 .filter(game -> editedGame.getRozgrywkaId().equals(game.getRozgrywkaId()))
                 .findAny().ifPresent(originalGame -> {
@@ -197,6 +197,7 @@ public class OXGame implements IOXGame {
         LoadGames();
         InitializeScoreTable();
         InitializeStatisticsTable();
+        UpdatePageCount();
 
         score_table.setEditable(true);
         playerX.setCellFactory(TextFieldTableCell.forTableColumn());
@@ -205,7 +206,6 @@ public class OXGame implements IOXGame {
 
     @Override
     public void setField(Button button) {
-        //TODO Wniosek - brak metody
         if (Utils.isNullOrWhitespace(button.getText())) {
             button.setText(Turn.getVisualisation());
             AddMove(Turn, GameFields.valueOf(button.getId()).getPosition());
@@ -284,18 +284,18 @@ public class OXGame implements IOXGame {
         dateTimeColumn.setCellValueFactory(new PropertyValueFactory<>("formattedDateTime"));
 
         pagination.currentPageIndexProperty()
-                .addListener((obs, oldIndex, newIndex) -> changeTableView(newIndex.intValue(), 3));
+                .addListener((obs, oldIndex, newIndex) -> changeTableView(newIndex.intValue(), rowsPerPage));
 
         games.addListener((ListChangeListener<Game>) c -> {
             UpdatePageCount();
 
-            if (c.next()) {
+            while (c.next()) {
                 if (c.wasAdded()) {
-                    changeTableView(c.getAddedSize() == 1 ? currentIndex : 0, 3);
+                    changeTableView(currentIndex, rowsPerPage);
                 } else if (c.wasRemoved()) {
                     score_table.getItems().clear();
                     score_table.refresh();
-                    changeTableView(0, 3);
+                    changeTableView(0, rowsPerPage);
                 }
             }
         });
@@ -321,9 +321,7 @@ public class OXGame implements IOXGame {
         int toIndex = Math.min(fromIndex + limit, games.size());
 
         ObservableList<Game> tmpObsToSetTableVal = FXCollections.observableArrayList();
-
         tmpObsToSetTableVal.addAll(games.subList(fromIndex, toIndex));
-
         score_table.setItems(tmpObsToSetTableVal);
     }
 
@@ -333,7 +331,6 @@ public class OXGame implements IOXGame {
             List<Game> rows = repositoryInstance.pobierzRozgrywki(1, repositoryInstance.getLastId());
 
             if (rows != null && rows.size() != 0) {
-                //TODO wniosek - synchronizacja wątków
                 Platform.runLater(() -> {
                     games.addAll(rows);
                     statistics.addAll(repositoryInstance.getStatistics(rows));
@@ -349,8 +346,8 @@ public class OXGame implements IOXGame {
     }
 
     private void UpdatePageCount() {
-        int totalPage = (int) (Math.ceil(games.size() * 1.0 / 3));
-        pagination.setPageCount(totalPage);
+        int totalPage = (int) (Math.ceil(games.size() * 1.0 / rowsPerPage));
+        pagination.setPageCount(totalPage == 0 ? 1 : totalPage);
     }
 
     private void ChangeButtonsResponsiveness(boolean disableState) {
